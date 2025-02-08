@@ -3,7 +3,6 @@ from src.DataLoader import DataLoader
 import io
 import zipfile
 
-
 class APP:
     _instance = None  # Singleton instance
 
@@ -13,23 +12,15 @@ class APP:
         return cls._instance
 
     def __init__(self):
-        # Bu kısım sadece ilk çalıştırmada yürütülür.
         if not hasattr(self, "_initialized"):
             self._initialized = True
 
-            # Gerekli session_state anahtarlarının tanımlı olduğundan emin olun.
-            if "data_loader" not in st.session_state:
-                st.session_state["data_loader"] = DataLoader()
-            if "start_date" not in st.session_state:
-                st.session_state["start_date"] = None
-            if "end_date" not in st.session_state:
-                st.session_state["end_date"] = None
-            if "data" not in st.session_state:
-                st.session_state["data"] = None
-            if "actor_code_mask" not in st.session_state:
-                st.session_state["actor_code_mask"] = None
-
-            # Actor listelerini güvenli şekilde başlatıyoruz.
+            # Gerekli session_state anahtarlarını güvenli şekilde oluşturuyoruz.
+            st.session_state.setdefault("data_loader", DataLoader())
+            st.session_state.setdefault("start_date", None)
+            st.session_state.setdefault("end_date", None)
+            st.session_state.setdefault("data", None)
+            st.session_state.setdefault("actor_code_mask", None)
             st.session_state.setdefault("actor_1_code_list", [])
             st.session_state.setdefault("actor_2_code_list", [])
 
@@ -61,7 +52,18 @@ class APP:
         if start_date is None or end_date is None:
             st.warning("Please select both start and end dates!")
             return
-        data = data_loader.load_data_range(start_date, end_date)
+
+        try:
+            data = data_loader.load_data_range(start_date, end_date)
+        except AttributeError as e:
+            st.error("Data loader encountered an attribute error. Please check your configuration.")
+            st.error(str(e))
+            return
+        except Exception as e:
+            st.error("An unexpected error occurred while loading data.")
+            st.error(str(e))
+            return
+
         st.session_state["data"] = data
         st.write(f"Loaded {len(data)} records.")
 
@@ -73,7 +75,6 @@ class APP:
         Parametre:
             actor: "actor1" veya "actor2" (veya 1 ya da 2)
         """
-        # Her seferinde ilgili key'in varlığını garanti altına alıyoruz.
         st.session_state.setdefault("actor_1_code_list", [])
         st.session_state.setdefault("actor_2_code_list", [])
 

@@ -3,53 +3,43 @@ import streamlit as st
 
 class DataLoader:
     def __init__(self):
-        # Gerekli sabitleri ve konfigürasyonları session_state'e güvenle ekliyoruz.
-        if "root_url" not in st.session_state:
-            st.session_state["root_url"] = "http://data.gdeltproject.org/events/{DATE}.export.CSV.zip"
-        if "columns" not in st.session_state:
-            st.session_state["columns"] = [
-                'GLOBALEVENTID', 'SQLDATE', 'MonthYear', 'Year', 'FractionDate', 'Actor1Code', 'Actor1Name',
-                'Actor1CountryCode', 'Actor1KnownGroupCode', 'Actor1EthnicCode', 'Actor1Religion1Code',
-                'Actor1Religion2Code', 'Actor1Type1Code', 'Actor1Type2Code', 'Actor1Type3Code', 'Actor2Code',
-                'Actor2Name', 'Actor2CountryCode', 'Actor2KnownGroupCode', 'Actor2EthnicCode',
-                'Actor2Religion1Code', 'Actor2Religion2Code', 'Actor2Type1Code', 'Actor2Type2Code',
-                'Actor2Type3Code', 'IsRootEvent', 'EventCode', 'EventBaseCode', 'EventRootCode', 'QuadClass',
-                'GoldsteinScale', 'NumMentions', 'NumSources', 'NumArticles', 'AvgTone', 'Actor1Geo_Type',
-                'Actor1Geo_FullName', 'Actor1Geo_CountryCode', 'Actor1Geo_ADM1Code', 'Actor1Geo_Lat',
-                'Actor1Geo_Long', 'Actor1Geo_FeatureID', 'Actor2Geo_Type', 'Actor2Geo_FullName',
-                'Actor2Geo_CountryCode', 'Actor2Geo_ADM1Code', 'Actor2Geo_Lat', 'Actor2Geo_Long',
-                'Actor2Geo_FeatureID', 'ActionGeo_Type', 'ActionGeo_FullName', 'ActionGeo_CountryCode',
-                'ActionGeo_ADM1Code', 'ActionGeo_Lat', 'ActionGeo_Long', 'ActionGeo_FeatureID', 'DATEADDED',
-                'SOURCEURL'
-            ]
-        if "selected_columns" not in st.session_state:
-            st.session_state["selected_columns"] = [
-                'SQLDATE', 'Actor1Name', 'Actor1CountryCode', 'Actor2Name', 'Actor2CountryCode',
-                'EventCode', 'ActionGeo_FullName', 'ActionGeo_CountryCode', 'ActionGeo_Lat',
-                'ActionGeo_Long', 'SOURCEURL'
-            ]
-        # Actor listeleri: Tutarlılık açısından APP'de kullandığınız anahtar isimleriyle aynı olacak.
-        if "actor_1_code_list" not in st.session_state:
-            st.session_state["actor_1_code_list"] = []
-        if "actor_2_code_list" not in st.session_state:
-            st.session_state["actor_2_code_list"] = []
+        st.session_state.setdefault("root_url", "http://data.gdeltproject.org/events/{DATE}.export.CSV.zip")
+        st.session_state.setdefault("columns", [
+            'GLOBALEVENTID', 'SQLDATE', 'MonthYear', 'Year', 'FractionDate', 'Actor1Code', 'Actor1Name',
+            'Actor1CountryCode', 'Actor1KnownGroupCode', 'Actor1EthnicCode', 'Actor1Religion1Code',
+            'Actor1Religion2Code', 'Actor1Type1Code', 'Actor1Type2Code', 'Actor1Type3Code', 'Actor2Code',
+            'Actor2Name', 'Actor2CountryCode', 'Actor2KnownGroupCode', 'Actor2EthnicCode',
+            'Actor2Religion1Code', 'Actor2Religion2Code', 'Actor2Type1Code', 'Actor2Type2Code',
+            'Actor2Type3Code', 'IsRootEvent', 'EventCode', 'EventBaseCode', 'EventRootCode', 'QuadClass',
+            'GoldsteinScale', 'NumMentions', 'NumSources', 'NumArticles', 'AvgTone', 'Actor1Geo_Type',
+            'Actor1Geo_FullName', 'Actor1Geo_CountryCode', 'Actor1Geo_ADM1Code', 'Actor1Geo_Lat',
+            'Actor1Geo_Long', 'Actor1Geo_FeatureID', 'Actor2Geo_Type', 'Actor2Geo_FullName',
+            'Actor2Geo_CountryCode', 'Actor2Geo_ADM1Code', 'Actor2Geo_Lat', 'Actor2Geo_Long',
+            'Actor2Geo_FeatureID', 'ActionGeo_Type', 'ActionGeo_FullName', 'ActionGeo_CountryCode',
+            'ActionGeo_ADM1Code', 'ActionGeo_Lat', 'ActionGeo_Long', 'ActionGeo_FeatureID', 'DATEADDED',
+            'SOURCEURL'
+        ])
+        st.session_state.setdefault("selected_columns", [
+            'SQLDATE', 'Actor1Name', 'Actor1CountryCode', 'Actor2Name', 'Actor2CountryCode',
+            'EventCode', 'ActionGeo_FullName', 'ActionGeo_CountryCode', 'ActionGeo_Lat',
+            'ActionGeo_Long', 'SOURCEURL'
+        ])
+        st.session_state.setdefault("actor_1_code_list", [])
+        st.session_state.setdefault("actor_2_code_list", [])
 
     def set_actor_filters(self, actor_1_list, actor_2_list):
         st.session_state["actor_1_code_list"] = actor_1_list
         st.session_state["actor_2_code_list"] = actor_2_list
 
     def load_data(self, date):
-        # URL'yi oluşturuyoruz.
         url = st.session_state["root_url"].format(DATE=date)
         try:
             df = pd.read_csv(url, sep='\t', header=None)
         except Exception as e:
             st.error(f"Error loading data for {date}: {e}")
             return pd.DataFrame()
-        # Sütun isimlerini atıyoruz.
         df.columns = st.session_state["columns"]
 
-        # Actor filtreleri uygulanıyor.
         actor_1_codes = st.session_state["actor_1_code_list"]
         actor_2_codes = st.session_state["actor_2_code_list"]
 
@@ -70,7 +60,6 @@ class DataLoader:
 
     def load_data_range(self, start_date, end_date):
         data_frames = []
-        # Tarih aralığını oluştururken, formatı direkt %Y%m%d kullanıyoruz.
         date_range = [date.strftime("%Y%m%d") for date in pd.date_range(start=start_date, end=end_date)]
         for date in date_range:
             st.write(f"Loading data for {date}...")
