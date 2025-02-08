@@ -99,7 +99,8 @@ class APP:
             - The **Actor 1 and Actor 2 filters** allow you to refine the data based on international actors.
             - If you don’t select a date range, **no data will be loaded**.
             - **Errors** may occur if GDELT data is unavailable for certain dates.
-
+            - LazyLoader currently supports data between **2013-04-01**, and **yesterday**'s date, with support for other dates planned for future updates
+            
             Happy data scraping! 🚀
             """
         )
