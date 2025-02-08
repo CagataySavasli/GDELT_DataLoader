@@ -13,11 +13,11 @@ class APP:
         return cls._instance
 
     def __init__(self):
-        # Bu kısım yalnızca bir kez çalışır, böylece session_state'e yalnızca ilk seferde değer atarız.
+        # Bu kısım sadece ilk çalıştırmada yürütülür.
         if not hasattr(self, "_initialized"):
             self._initialized = True
 
-            # Session state'de ilgili anahtarlar yoksa oluşturuyoruz.
+            # Gerekli session_state anahtarlarının tanımlı olduğundan emin olun.
             if "data_loader" not in st.session_state:
                 st.session_state["data_loader"] = DataLoader()
             if "start_date" not in st.session_state:
@@ -28,10 +28,10 @@ class APP:
                 st.session_state["data"] = None
             if "actor_code_mask" not in st.session_state:
                 st.session_state["actor_code_mask"] = None
-            if "actor_1_code_list" not in st.session_state:
-                st.session_state["actor_1_code_list"] = []
-            if "actor_2_code_list" not in st.session_state:
-                st.session_state["actor_2_code_list"] = []
+
+            # Actor listelerini güvenli şekilde başlatıyoruz.
+            st.session_state.setdefault("actor_1_code_list", [])
+            st.session_state.setdefault("actor_2_code_list", [])
 
     def intro_joke(self):
         st.title("LazyLoader-GDELT 🦥")
@@ -61,7 +61,6 @@ class APP:
         if start_date is None or end_date is None:
             st.warning("Please select both start and end dates!")
             return
-
         data = data_loader.load_data_range(start_date, end_date)
         st.session_state["data"] = data
         st.write(f"Loaded {len(data)} records.")
@@ -72,10 +71,12 @@ class APP:
         bir text input ve yan yana 3 buton (Add, Remove, Reset) gösterir.
 
         Parametre:
-            actor: "actor1" veya "actor2" (veya 1 ya da 2) şeklinde verilip,
-                   hangi aktörün kod listesinin yönetileceğini belirler.
+            actor: "actor1" veya "actor2" (veya 1 ya da 2)
         """
-        # Parametreye göre ilgili liste ve etiket ayarlanıyor.
+        # Her seferinde ilgili key'in varlığını garanti altına alıyoruz.
+        st.session_state.setdefault("actor_1_code_list", [])
+        st.session_state.setdefault("actor_2_code_list", [])
+
         if actor == 1 or actor == "actor1":
             actor_list = st.session_state["actor_1_code_list"]
             key_prefix = "actor1"
@@ -118,7 +119,6 @@ class APP:
         st.write("Actor Filters Applied!")
         data_loader = st.session_state.get("data_loader")
         if data_loader:
-            # DataLoader içerisinde set_actor_filters metodunun tanımlı olduğunu varsayıyoruz.
             data_loader.set_actor_filters(
                 st.session_state["actor_1_code_list"],
                 st.session_state["actor_2_code_list"]
@@ -129,10 +129,9 @@ class APP:
     def download_data_button(self):
         data = st.session_state.get("data")
         if data is not None:
-            # Veriyi CSV formatına dönüştür ve zip dosyasına ekle.
-            csv_data = data.to_csv(index=False).encode('utf-8')
+            csv_data = data.to_csv(index=False).encode("utf-8")
             zip_buffer = io.BytesIO()
-            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
                 zf.writestr("data.csv", csv_data)
             zip_buffer.seek(0)
             st.download_button(
