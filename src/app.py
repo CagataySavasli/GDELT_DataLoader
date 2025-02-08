@@ -4,25 +4,25 @@ import io
 import zipfile
 
 class APP:
-    _instance = None  # Singleton instance
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(APP, cls).__new__(cls)
-        return cls._instance
+    # _instance = None  # Singleton instance
+    #
+    # def __new__(cls, *args, **kwargs):
+    #     if cls._instance is None:
+    #         cls._instance = super(APP, cls).__new__(cls)
+    #     return cls._instance
 
     def __init__(self):
-        if not hasattr(self, "_initialized"):
-            self._initialized = True
+        # if not hasattr(self, "_initialized"):
+        #     self._initialized = True
 
-            # Gerekli session_state anahtarlarını güvenli şekilde oluşturuyoruz.
-            st.session_state.setdefault("data_loader", DataLoader())
-            st.session_state.setdefault("start_date", None)
-            st.session_state.setdefault("end_date", None)
-            st.session_state.setdefault("data", None)
-            st.session_state.setdefault("actor_code_mask", None)
-            st.session_state.setdefault("actor_1_code_list", [])
-            st.session_state.setdefault("actor_2_code_list", [])
+        # Gerekli session_state anahtarlarını güvenli şekilde oluşturuyoruz.
+        st.session_state.setdefault("data_loader", DataLoader())
+        st.session_state.setdefault("start_date", None)
+        st.session_state.setdefault("end_date", None)
+        st.session_state.setdefault("data", None)
+        st.session_state.setdefault("actor_code_mask", None)
+        st.session_state.setdefault("actor_1_code_list", [])
+        st.session_state.setdefault("actor_2_code_list", [])
 
     def intro_joke(self):
         st.title("LazyLoader-GDELT 🦥")
