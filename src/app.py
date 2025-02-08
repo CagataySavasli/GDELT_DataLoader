@@ -5,23 +5,33 @@ import zipfile
 
 
 class APP:
-    _instance = None  # Sınıf düzeyinde tek bir örnek tutulur.
+    _instance = None  # Singleton instance
 
     def __new__(cls, *args, **kwargs):
-        if not cls._instance:
+        if cls._instance is None:
             cls._instance = super(APP, cls).__new__(cls)
         return cls._instance
 
     def __init__(self):
+        # Bu kısım yalnızca bir kez çalışır, böylece session_state'e yalnızca ilk seferde değer atarız.
         if not hasattr(self, "_initialized"):
             self._initialized = True
-            st.session_state.data_loader = DataLoader()
-            st.session_state.start_date = None
-            st.session_state.end_date = None
-            st.session_state.data = None
-            st.session_state.actor_code_mask = None
-            st.session_state.actor_1_code_list = []
-            st.session_state.actor_2_code_list = []
+
+            # Session state'de ilgili anahtarlar yoksa oluşturuyoruz.
+            if "data_loader" not in st.session_state:
+                st.session_state["data_loader"] = DataLoader()
+            if "start_date" not in st.session_state:
+                st.session_state["start_date"] = None
+            if "end_date" not in st.session_state:
+                st.session_state["end_date"] = None
+            if "data" not in st.session_state:
+                st.session_state["data"] = None
+            if "actor_code_mask" not in st.session_state:
+                st.session_state["actor_code_mask"] = None
+            if "actor_1_code_list" not in st.session_state:
+                st.session_state["actor_1_code_list"] = []
+            if "actor_2_code_list" not in st.session_state:
+                st.session_state["actor_2_code_list"] = []
 
     def intro_joke(self):
         st.title("LazyLoader-GDELT 🦥")
@@ -41,12 +51,20 @@ class APP:
         )
 
     def get_dates(self):
-        st.session_state.start_date = st.date_input("Start Date")
-        st.session_state.end_date = st.date_input("End Date")
+        st.session_state["start_date"] = st.date_input("Start Date")
+        st.session_state["end_date"] = st.date_input("End Date")
 
     def load_data(self):
-        st.session_state.data = st.session_state.data_loader.load_data_range(st.session_state.start_date, st.session_state.end_date)
-        st.write(f"Loaded {len(st.session_state.data)} records.")
+        start_date = st.session_state.get("start_date")
+        end_date = st.session_state.get("end_date")
+        data_loader = st.session_state.get("data_loader")
+        if start_date is None or end_date is None:
+            st.warning("Please select both start and end dates!")
+            return
+
+        data = data_loader.load_data_range(start_date, end_date)
+        st.session_state["data"] = data
+        st.write(f"Loaded {len(data)} records.")
 
     def actor_buttons(self, actor):
         """
@@ -59,11 +77,11 @@ class APP:
         """
         # Parametreye göre ilgili liste ve etiket ayarlanıyor.
         if actor == 1 or actor == "actor1":
-            actor_list = st.session_state.actor_1_code_list
+            actor_list = st.session_state["actor_1_code_list"]
             key_prefix = "actor1"
             actor_label = "Actor 1"
         elif actor == 2 or actor == "actor2":
-            actor_list = st.session_state.actor_2_code_list
+            actor_list = st.session_state["actor_2_code_list"]
             key_prefix = "actor2"
             actor_label = "Actor 2"
         else:
@@ -95,22 +113,28 @@ class APP:
         st.write(f"Current {actor_label} List:", actor_list)
 
     def actor_filter(self):
-        st.write("Actor 1 Codes:", st.session_state.actor_1_code_list)
-        st.write("Actor 2 Codes:", st.session_state.actor_2_code_list)
+        st.write("Actor 1 Codes:", st.session_state["actor_1_code_list"])
+        st.write("Actor 2 Codes:", st.session_state["actor_2_code_list"])
         st.write("Actor Filters Applied!")
-        st.session_state.data_loader.set_actor_filters(st.session_state.actor_1_code_list, st.session_state.actor_2_code_list)
+        data_loader = st.session_state.get("data_loader")
+        if data_loader:
+            # DataLoader içerisinde set_actor_filters metodunun tanımlı olduğunu varsayıyoruz.
+            data_loader.set_actor_filters(
+                st.session_state["actor_1_code_list"],
+                st.session_state["actor_2_code_list"]
+            )
+        else:
+            st.error("Data loader not available.")
 
     def download_data_button(self):
-        if st.session_state.data is not None:
-            # Veriyi CSV formatına dönüştürüyoruz.
-            csv_data = st.session_state.data.to_csv(index=False).encode('utf-8')
-
-            # Hafızada bir ZIP dosyası oluşturuyoruz.
+        data = st.session_state.get("data")
+        if data is not None:
+            # Veriyi CSV formatına dönüştür ve zip dosyasına ekle.
+            csv_data = data.to_csv(index=False).encode('utf-8')
             zip_buffer = io.BytesIO()
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
                 zf.writestr("data.csv", csv_data)
-            zip_buffer.seek(0)  # BytesIO imlecini başa alıyoruz.
-
+            zip_buffer.seek(0)
             st.download_button(
                 label="Download Data as ZIP",
                 data=zip_buffer,
