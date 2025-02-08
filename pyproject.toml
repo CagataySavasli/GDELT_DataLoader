@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "gdelt-dataloader"
+version = "0.1.0"
+description = ""
+authors = ["Ahmet Çağatay Savaşlı <cagatay.savasli@ozu.edu.tr>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+jupyter = "^1.1.1"
+pandas = "^2.2.3"
+streamlit = "^1.42.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
