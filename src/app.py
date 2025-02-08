@@ -4,16 +4,8 @@ import io
 import zipfile
 
 class APP:
-    # _instance = None  # Singleton instance
-    #
-    # def __new__(cls, *args, **kwargs):
-    #     if cls._instance is None:
-    #         cls._instance = super(APP, cls).__new__(cls)
-    #     return cls._instance
 
     def __init__(self):
-        # if not hasattr(self, "_initialized"):
-        #     self._initialized = True
 
         # Gerekli session_state anahtarlarını güvenli şekilde oluşturuyoruz.
         st.session_state.setdefault("data_loader", DataLoader())

@@ -60,14 +60,28 @@ class DataLoader:
 
     def load_data_range(self, start_date, end_date):
         data_frames = []
+        # Belirtilen tarih aralığındaki tüm tarihleri "YYYYMMDD" formatında elde ediyoruz.
         date_range = [date.strftime("%Y%m%d") for date in pd.date_range(start=start_date, end=end_date)]
-        for date in date_range:
-            st.write(f"Loading data for {date}...")
+
+        # Progress bar ve mesaj göstermek için alan oluşturuyoruz.
+        progress_bar = st.progress(0)
+        progress_text = st.empty()  # İlerleme mesajlarını göstermek için boş bir alan.
+
+        total_dates = len(date_range)
+        for i, date in enumerate(date_range):
+            # İlerleme mesajını güncelleyelim.
+            progress_text.text(f"Loading data for {date}...")
             df = self.load_data(date)
             if not df.empty:
                 data_frames.append(df)
+            # Progress bar'ı güncelle.
+            progress_bar.progress((i + 1) / total_dates)
+
+        progress_text.text("Data loading completed!")
+
         if data_frames:
             return pd.concat(data_frames, ignore_index=True)
         else:
             st.warning("No data loaded for the given date range.")
             return pd.DataFrame()
+
