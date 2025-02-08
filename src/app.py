@@ -2,6 +2,7 @@ import streamlit as st
 from src.DataLoader import DataLoader
 import io
 import zipfile
+import pandas as pd
 from datetime import date, timedelta
 
 
@@ -135,6 +136,19 @@ class APP:
         st.session_state["data"] = data
         st.write(f"Loaded {len(data)} records.")
 
+    def camoe_code_searcher(self):
+        df = pd.read_csv("src/CAMEO_country.txt", sep="\t", header=None, names=["CODE", "LABEL"]).loc[1:].reset_index(
+            drop=True).copy()
+
+        if df is not None:
+            country_dict = dict(zip(df["LABEL"], df["CODE"]))
+            search_query = st.text_input("Search for a country:")
+            if search_query:
+                suggestions = [country for country in country_dict.keys() if
+                               country.lower().startswith(search_query.lower())]
+                selected_country = st.selectbox("Select a country:", suggestions, index=0 if suggestions else None)
+                if selected_country:
+                    st.write(f"**Selected Country Code:** {country_dict[selected_country]}")
     def actor_buttons(self, actor):
         """
         Tek bir fonksiyon kullanarak, Actor 1 veya Actor 2 için

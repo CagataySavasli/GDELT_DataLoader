@@ -17,6 +17,10 @@ def main():
     st.markdown("---")
 
     st.markdown("# Actor Code Filter:")
+
+    with st.expander("🔎 Country Codes Searcher 🌍"):
+        app.camoe_code_searcher()
+
     st.subheader("Filter by Actor 1")
     app.actor_buttons("actor1")
 
@@ -32,6 +36,7 @@ def main():
         app.load_data()
 
     app.download_data_button()
+
 
 if __name__ == "__main__":
     main()
