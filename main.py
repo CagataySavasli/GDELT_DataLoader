@@ -8,7 +8,6 @@ def main():
 
     st.markdown("---")
 
-    st.write("This application allows you to scrape event data from [GDELT](http://data.gdeltproject.org/events/index.html) ")
     with st.expander("📖 How to Use LazyLoader-GDELT 🦥"):
         app.how_to_use()
 
