@@ -24,7 +24,7 @@ class APP:
             self.actor_2_code_list = []
 
     def intro_joke(self):
-        st.title("GDELT Data Loader")
+        st.title("LazyLoader-GDELT 🦥")
         st.markdown(
             """
             Hey YOU 🫵 ❗
