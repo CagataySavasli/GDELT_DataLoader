@@ -1,10 +1,10 @@
 import pandas as pd
-
+import streamlit as st
 
 class DataLoader:
     def __init__(self):
-        self.root_url = "http://data.gdeltproject.org/events/{DATE}.export.CSV.zip"
-        self.columns = ['GLOBALEVENTID', 'SQLDATE', 'MonthYear', 'Year', 'FractionDate', 'Actor1Code', 'Actor1Name',
+        st.session_state.root_url = "http://data.gdeltproject.org/events/{DATE}.export.CSV.zip"
+        st.session_state.columns = ['GLOBALEVENTID', 'SQLDATE', 'MonthYear', 'Year', 'FractionDate', 'Actor1Code', 'Actor1Name',
                         'Actor1CountryCode', 'Actor1KnownGroupCode', 'Actor1EthnicCode', 'Actor1Religion1Code',
                         'Actor1Religion2Code', 'Actor1Type1Code', 'Actor1Type2Code', 'Actor1Type3Code', 'Actor2Code',
                         'Actor2Name', 'Actor2CountryCode', 'Actor2KnownGroupCode', 'Actor2EthnicCode',
@@ -18,31 +18,31 @@ class DataLoader:
                         'ActionGeo_ADM1Code', 'ActionGeo_Lat', 'ActionGeo_Long', 'ActionGeo_FeatureID', 'DATEADDED',
                         'SOURCEURL']
 
-        self.selected_columns = ['SQLDATE', 'Actor1Name', 'Actor1CountryCode', 'Actor2Name', 'Actor2CountryCode',
+        st.session_state.selected_columns = ['SQLDATE', 'Actor1Name', 'Actor1CountryCode', 'Actor2Name', 'Actor2CountryCode',
                                  'EventCode', 'ActionGeo_FullName', 'ActionGeo_CountryCode', 'ActionGeo_Lat',
                                  'ActionGeo_Long', 'SOURCEURL']
 
-        self.actor_1_list = None
-        self.actor_2_list = None
+        st.session_state.actor_1_list = None
+        st.session_state.actor_2_list = None
 
     def set_actor_filters(self, actor_1_list, actor_2_list):
-        self.actor_1_list = actor_1_list
-        self.actor_2_list = actor_2_list
+        st.session_state.actor_1_list = actor_1_list
+        st.session_state.actor_2_list = actor_2_list
 
     def load_data(self, date):
-        url = self.root_url.format(DATE=date)
+        url = st.session_state.root_url.format(DATE=date)
         df = pd.read_csv(url, sep='\t', header=None)
-        df.columns = self.columns
+        df.columns = st.session_state.columns
 
-        if self.actor_1_list and self.actor_2_list:
-            mask = (df['Actor1Code'].isin(self.actor_1_list)) & (df['Actor2Code'].isin(self.actor_2_list)) | \
-                     (df['Actor1Code'].isin(self.actor_2_list)) & (df['Actor2Code'].isin(self.actor_1_list))
+        if st.session_state.actor_1_list and st.session_state.actor_2_list:
+            mask = (df['Actor1Code'].isin(st.session_state.actor_1_list)) & (df['Actor2Code'].isin(st.session_state.actor_2_list)) | \
+                     (df['Actor1Code'].isin(st.session_state.actor_2_list)) & (df['Actor2Code'].isin(st.session_state.actor_1_list))
             df = df[mask].copy()
-        elif self.actor_1_list:
-            mask = (df['Actor1Code'].isin(self.actor_1_list)) | (df['Actor2Code'].isin(self.actor_1_list))
+        elif st.session_state.actor_1_list:
+            mask = (df['Actor1Code'].isin(st.session_state.actor_1_list)) | (df['Actor2Code'].isin(st.session_state.actor_1_list))
             df = df[mask].copy()
-        elif self.actor_2_list:
-            mask = (df['Actor1Code'].isin(self.actor_2_list)) | (df['Actor2Code'].isin(self.actor_2_list))
+        elif st.session_state.actor_2_list:
+            mask = (df['Actor1Code'].isin(st.session_state.actor_2_list)) | (df['Actor2Code'].isin(st.session_state.actor_2_list))
             df = df[mask].copy()
 
         return df
@@ -53,6 +53,6 @@ class DataLoader:
                       pd.date_range(start=start_date, end=end_date)]
         for date in date_range:
             print(f"Loading data for {date}...")
-            data.append(self.load_data(date))
+            data.append(st.session_state.load_data(date))
 
         return pd.concat(data, ignore_index=True)

@@ -15,13 +15,13 @@ class APP:
     def __init__(self):
         if not hasattr(self, "_initialized"):
             self._initialized = True
-            self.data_loader = DataLoader()
-            self.start_date = None
-            self.end_date = None
-            self.data = None
-            self.actor_code_mask = None
-            self.actor_1_code_list = []
-            self.actor_2_code_list = []
+            st.session_state.data_loader = DataLoader()
+            st.session_state.start_date = None
+            st.session_state.end_date = None
+            st.session_state.data = None
+            st.session_state.actor_code_mask = None
+            st.session_state.actor_1_code_list = []
+            st.session_state.actor_2_code_list = []
 
     def intro_joke(self):
         st.title("LazyLoader-GDELT 🦥")
@@ -41,12 +41,12 @@ class APP:
         )
 
     def get_dates(self):
-        self.start_date = st.date_input("Start Date")
-        self.end_date = st.date_input("End Date")
+        st.session_state.start_date = st.date_input("Start Date")
+        st.session_state.end_date = st.date_input("End Date")
 
     def load_data(self):
-        self.data = self.data_loader.load_data_range(self.start_date, self.end_date)
-        st.write(f"Loaded {len(self.data)} records.")
+        st.session_state.data = st.session_state.data_loader.load_data_range(st.session_state.start_date, st.session_state.end_date)
+        st.write(f"Loaded {len(st.session_state.data)} records.")
 
     def actor_buttons(self, actor):
         """
@@ -59,11 +59,11 @@ class APP:
         """
         # Parametreye göre ilgili liste ve etiket ayarlanıyor.
         if actor == 1 or actor == "actor1":
-            actor_list = self.actor_1_code_list
+            actor_list = st.session_state.actor_1_code_list
             key_prefix = "actor1"
             actor_label = "Actor 1"
         elif actor == 2 or actor == "actor2":
-            actor_list = self.actor_2_code_list
+            actor_list = st.session_state.actor_2_code_list
             key_prefix = "actor2"
             actor_label = "Actor 2"
         else:
@@ -95,15 +95,15 @@ class APP:
         st.write(f"Current {actor_label} List:", actor_list)
 
     def actor_filter(self):
-        st.write("Actor 1 Codes:", self.actor_1_code_list)
-        st.write("Actor 2 Codes:", self.actor_2_code_list)
+        st.write("Actor 1 Codes:", st.session_state.actor_1_code_list)
+        st.write("Actor 2 Codes:", st.session_state.actor_2_code_list)
         st.write("Actor Filters Applied!")
-        self.data_loader.set_actor_filters(self.actor_1_code_list, self.actor_2_code_list)
+        st.session_state.data_loader.set_actor_filters(st.session_state.actor_1_code_list, st.session_state.actor_2_code_list)
 
     def download_data_button(self):
-        if self.data is not None:
+        if st.session_state.data is not None:
             # Veriyi CSV formatına dönüştürüyoruz.
-            csv_data = self.data.to_csv(index=False).encode('utf-8')
+            csv_data = st.session_state.data.to_csv(index=False).encode('utf-8')
 
             # Hafızada bir ZIP dosyası oluşturuyoruz.
             zip_buffer = io.BytesIO()
