@@ -2,6 +2,7 @@ import streamlit as st
 from src.DataLoader import DataLoader
 import io
 import zipfile
+from datetime import date, timedelta
 
 class APP:
 
@@ -33,7 +34,77 @@ class APP:
             """
         )
 
+    def how_to_use(self):
+        st.title("📖 How to Use LazyLoader-GDELT 🦥")
+        st.markdown(
+            """
+            This application allows you to scrape event data from [GDELT](http://data.gdeltproject.org/events/index.html) 
+            based on a selected date range and filter it using Actor 1 and Actor 2 country codes.
+            """
+        )
+
+        st.header("1️⃣ Select a Date Range")
+        st.markdown(
+            """
+            - In the **"Date Range"** section, choose a **Start Date** and an **End Date**.
+            - The application will download GDELT event data for all dates within the selected range.
+            """
+        )
+
+        st.header("2️⃣ Filter by Actor Codes (Optional)")
+        st.markdown(
+            """
+            GDELT records interactions between two actors (Actor 1 and Actor 2). You can filter data by selecting specific Actor codes.
+
+            ### **Add Actor 1 or Actor 2 Codes**
+            1. **Enter a country or actor CAMEO code** in the text box under **Actor 1** or **Actor 2**.
+            2. Click **"Add Actor 1 Code"** or **"Add Actor 2 Code"** to include the code in the filter list.
+            3. To remove the last added code, click **"Remove Actor Code"**.
+            4. To clear all Actor codes, click **"Reset Actor List"**.
+
+            💡 **If you don’t enter any actor codes, the data will include all records without filtering by actor.**
+            """
+        )
+
+        st.header("3️⃣ Apply Actor Filters")
+        st.markdown(
+            """
+            - Once you've added Actor 1 and/or Actor 2 codes, click **"Apply Actor Filter"**.
+            - The application will filter data accordingly.
+            """
+        )
+
+        st.header("4️⃣ Load Data")
+        st.markdown(
+            """
+            - Click the **"Load Data"** button to start retrieving data from GDELT.
+            - The application will display the number of records loaded.
+            - **Progress bar** shows the download progress.
+            """
+        )
+
+        st.header("5️⃣ Download Data")
+        st.markdown(
+            """
+            - Once data is loaded, you can download it by clicking **"Download Data as ZIP"**.
+            - The downloaded file will contain a CSV file (`data.csv`) with the filtered event records.
+            """
+        )
+
+        st.markdown("---")
+        st.subheader("⚠️ Notes")
+        st.markdown(
+            """
+            - The application fetches data from **GDELT in CSV format**.
+            - The **Actor 1 and Actor 2 filters** allow you to refine the data based on international actors.
+            - If you don’t select a date range, **no data will be loaded**.
+            - **Errors** may occur if GDELT data is unavailable for certain dates.
+
+            Happy data scraping! 🚀
+            """
+        )
     def get_dates(self):
+        st.write(f"Please select the date range between **2013-04-01** and **{date.today() - timedelta(days=1)}** for the data you want to load.")
         st.session_state["start_date"] = st.date_input("Start Date")
         st.session_state["end_date"] = st.date_input("End Date")
 

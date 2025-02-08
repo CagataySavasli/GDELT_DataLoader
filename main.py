@@ -8,8 +8,10 @@ def main():
 
     st.markdown("---")
 
+    with st.expander("📖 How to Use LazyLoader-GDELT 🦥"):
+        app.how_to_use()
+
     st.markdown("# Date Range:")
-    st.write("Please select the date range for the data you want to load.")
     app.get_dates()
 
     st.markdown("---")
