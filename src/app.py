@@ -9,7 +9,6 @@ class APP:
 
     def __init__(self):
 
-        # Gerekli session_state anahtarlarını güvenli şekilde oluşturuyoruz.
         st.session_state.setdefault("data_loader", DataLoader())
         st.session_state.setdefault("start_date", None)
         st.session_state.setdefault("end_date", None)
@@ -107,7 +106,9 @@ class APP:
 
     def get_dates(self):
         st.write(
-            f"Please select the date range between **2013-04-01** and **{date.today() - timedelta(days=1)}** for the data you want to load.")
+            f"Please select the date range between **2013-04-01** and **{date.today() - timedelta(days=1)}** for the data you want to load."
+            " The application will download data for all dates within the selected range."
+        )
         st.session_state["start_date"] = st.date_input("Start Date")
         st.session_state["end_date"] = st.date_input("End Date")
 
