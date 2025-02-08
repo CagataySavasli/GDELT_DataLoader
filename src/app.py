@@ -4,6 +4,7 @@ import io
 import zipfile
 from datetime import date, timedelta
 
+
 class APP:
 
     def __init__(self):
@@ -103,8 +104,10 @@ class APP:
             Happy data scraping! 🚀
             """
         )
+
     def get_dates(self):
-        st.write(f"Please select the date range between **2013-04-01** and **{date.today() - timedelta(days=1)}** for the data you want to load.")
+        st.write(
+            f"Please select the date range between **2013-04-01** and **{date.today() - timedelta(days=1)}** for the data you want to load.")
         st.session_state["start_date"] = st.date_input("Start Date")
         st.session_state["end_date"] = st.date_input("End Date")
 
