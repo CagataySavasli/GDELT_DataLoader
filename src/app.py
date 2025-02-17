@@ -20,6 +20,21 @@ class APP:
             """
         )
 
+    def apps_infos(self):
+        with st.sidebar.expander("ℹ️ About the Apps"):
+            st.markdown(
+                """
+                **Event Data App:**
+                - Downloads GDELT event data based on a selected date range.
+                - Allows filtering by entering Actor 1 and Actor 2 codes.
+                - You can download the filtered data as a ZIP file.
+
+                **Graph Data App:**
+                - Downloads GDELT Graph (GKG) data based on a selected date range.
+                - Filters data using keywords in the THEMES column.
+                - Processed data can be downloaded as a ZIP file.
+                """
+            )
     def select_app(self):
         st.sidebar.title("🦥 LazyLoader-GDELT")
         app_selection = st.sidebar.radio("Select an App", ["Event Data", "Graph Data"])
@@ -28,6 +43,8 @@ class APP:
             self.event_data_app()
         elif app_selection == "Graph Data":
             self.graph_data_app()
+
+        self.apps_infos()
 
     def event_data_app(self):
         app = EventData_APP()
