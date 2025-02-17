@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import streamlit as st
 
@@ -75,13 +76,20 @@ class GraphDataLoader:
     def filter_data(self, keywords):
         """
         Filters the loaded dataset to include only rows where the 'THEMES' column
-        contains any of the specified keywords.
+        contains any of the specified keywords as separate tokens.
+
+        For example, if 'WAR' is provided as a keyword, it will match entries like
+        'WAR_THEME' (where 'WAR' appears as a distinct token) but not 'SOFTWARE'.
 
         Parameters:
             keywords (list): List of keywords to filter by.
         """
         if self.data is not None and 'THEMES' in self.data.columns:
-            mask = self.data['THEMES'].fillna("").str.contains('|'.join(keywords), case=False, na=False)
+            # Build regex patterns for each keyword to match as a distinct token
+            regex_parts = [fr'(?<=^|_){re.escape(keyword)}(?=$|_)' for keyword in keywords]
+            pattern = '|'.join(regex_parts)
+
+            mask = self.data['THEMES'].fillna("").str.contains(pattern, case=False, na=False, regex=True)
             self.data = self.data[mask].copy()
         else:
             st.warning("Data has not been loaded or the 'THEMES' column is missing.")
@@ -89,7 +97,11 @@ class GraphDataLoader:
     def iterative_filter_data(self, df, keywords):
         """
         Filters the given DataFrame to include only rows where the 'THEMES' column
-        contains any of the specified keywords.
+        contains any of the specified keywords as separate tokens.
+
+        For example, if 'WAR' is provided as a keyword, it will accept entries like
+        'WAR_THEME' (where 'WAR' appears as a distinct token) but will not match
+        strings like 'SOFTWARE'.
 
         Parameters:
             df (pd.DataFrame): The DataFrame to filter.
@@ -99,9 +111,13 @@ class GraphDataLoader:
             pd.DataFrame: The filtered DataFrame.
         """
         if df is not None and 'THEMES' in df.columns:
-            mask = df['THEMES'].fillna("").str.contains('|'.join(keywords), case=False, na=False)
-            df = df[mask].copy()
-            return df
+            # Build a regex pattern that matches each keyword only if it appears as a separate token.
+            # The pattern uses lookbehind and lookahead to ensure the keyword is either at the start/end
+            # of the string or preceded/followed by an underscore.
+            regex_parts = [fr'(?<=^|_){re.escape(keyword)}(?=$|_)' for keyword in keywords]
+            pattern = '|'.join(regex_parts)
+            mask = df['THEMES'].fillna("").str.contains(pattern, case=False, na=False, regex=True)
+            return df[mask].copy()
         else:
             st.warning("Data is not loaded or the 'THEMES' column is missing.")
             return pd.DataFrame()
