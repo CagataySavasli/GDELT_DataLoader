@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-class DataLoader:
+class EventDataLoader:
     def __init__(self):
         st.session_state.setdefault("root_url", "http://data.gdeltproject.org/events/{DATE}.export.CSV.zip")
         st.session_state.setdefault("columns", [
@@ -26,6 +26,8 @@ class DataLoader:
         ])
         st.session_state.setdefault("actor_1_code_list", [])
         st.session_state.setdefault("actor_2_code_list", [])
+
+        print("EventDataLoader initialized.")
 
     def set_actor_filters(self, actor_1_list, actor_2_list):
         st.session_state["actor_1_code_list"] = actor_1_list
