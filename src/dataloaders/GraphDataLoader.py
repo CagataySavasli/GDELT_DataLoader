@@ -22,7 +22,7 @@ class GraphDataLoader:
             return pd.DataFrame()
         return df
 
-    def load_data_range(self, start_date, end_date):
+    def load_data_range(self, start_date, end_date, keywords):
         """
         Belirtilen tarih aralığındaki verileri yükler. 
         Streamlit progress bar ve mesajlarıyla indirme süreci takip edilir.
@@ -38,6 +38,7 @@ class GraphDataLoader:
         for i, date in enumerate(date_range):
             progress_text.text(f"{date} tarihli veriler yükleniyor...")
             df = self.load_data(date)
+            df = self.iterative_filter_data(df, keywords)
             if not df.empty:
                 data_frames.append(df)
             progress_bar.progress((i + 1) / total_dates)
@@ -66,6 +67,17 @@ class GraphDataLoader:
         if self.data is not None and 'THEMES' in self.data.columns:
             mask = self.data['THEMES'].fillna("").str.contains('|'.join(keywords), case=False, na=False)
             self.data = self.data[mask].copy()
+        else:
+            st.warning("Veri yüklenmedi veya 'THEMES' sütunu mevcut değil.")
+
+    def iterative_filter_data(self, df, keywords):
+        """
+        'THEMES' sütununda verilen anahtar kelimeleri içeren satırları filtreler.
+        """
+        if df is not None and 'THEMES' in df.columns:
+            mask = df['THEMES'].fillna("").str.contains('|'.join(keywords), case=False, na=False)
+            df = df[mask].copy()
+            return df
         else:
             st.warning("Veri yüklenmedi veya 'THEMES' sütunu mevcut değil.")
 
@@ -115,8 +127,8 @@ class GraphDataLoader:
         Belirtilen tarih aralığı için veriyi indirir, filtreler, TONE sütununu işler
         ve DATE sütununu düzenler. Sonuçta işlenmiş veri kümesini döndürür.
         """
-        self.load_data_range(start_date, end_date)
-        self.filter_data(keywords)
+        self.load_data_range(start_date, end_date, keywords)
+        #self.filter_data(keywords)
         self.parse_tone_column()
         self.fix_date_column()
         return self.get_data()
