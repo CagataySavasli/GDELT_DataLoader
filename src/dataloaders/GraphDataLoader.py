@@ -129,7 +129,10 @@ class GraphDataLoader:
         """
         self.load_data_range(start_date, end_date, keywords)
         st.write(f"Veri kümesinde {self.data.shape[0]} satır ve {self.data.shape[1]} sütun mevcut.")
-        #self.filter_data(keywords)
+        self.filter_data(keywords)
+        st.write(f"Veri kümesinde {self.data.shape[0]} satır ve {self.data.shape[1]} sütun mevcut.")
         self.parse_tone_column()
+        st.write(f"Veri kümesinde {self.data.shape[0]} satır ve {self.data.shape[1]} sütun mevcut.")
         self.fix_date_column()
+        st.write(f"Veri kümesinde {self.data.shape[0]} satır ve {self.data.shape[1]} sütun mevcut.")
         return self.get_data()
