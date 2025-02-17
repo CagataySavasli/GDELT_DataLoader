@@ -5,9 +5,7 @@ from src.app import APP
 def main():
     app = APP()
     app.intro_joke()
-
     st.markdown("---")
-
     app.select_app()
 
 
