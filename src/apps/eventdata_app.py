@@ -21,13 +21,17 @@ class EventData_APP:
         st.session_state.setdefault("event_code_list", [])
         st.session_state.setdefault("show_event_code_dict", False)
 
-
     def how_to_use(self):
         st.title("📖 How to Use LazyLoader-GDELT 🦥")
         st.markdown(
             """
-            This application allows you to scrape event data from [GDELT](http://data.gdeltproject.org/events/index.html) 
-            based on a selected date range and filter it using Actor 1 and Actor 2 country codes.
+            This application allows you to scrape event data from [GDELT](http://data.gdeltproject.org/events/index.html)
+            based on a selected date range. You can refine the data using various filters:
+
+            - **Actor Filters:** Narrow down events by specifying Actor 1 and Actor 2 codes.
+            - **Event Code Filters:** Filter events by specific Event Codes (entered as strings, so "081" remains "081").
+            - **Root Event Code Filters:** Target events under broader categories by using Root Event Codes.
+            - **Event Code Dictionary:** Browse a hierarchical view of Event Codes and their descriptions to help you decide on filters.
             """
         )
 
@@ -42,9 +46,9 @@ class EventData_APP:
         st.header("2️⃣ Filter by Actor Codes (Optional)")
         st.markdown(
             """
-            GDELT records interactions between two actors (Actor 1 and Actor 2). You can filter data by selecting specific Actor codes.
+            GDELT records interactions between two actors. You can filter data by entering Actor 1 and Actor 2 codes.
 
-            ### **Add Actor 1 or Actor 2 Codes**
+            ### **How to Add Actor Codes**
             1. **Enter a country or actor CAMEO code** in the text box under **Actor 1** or **Actor 2**.
             2. Click **"Add Actor 1 Code"** or **"Add Actor 2 Code"** to include the code in the filter list.
             3. To remove the last added code, click **"Remove Actor Code"**.
@@ -54,27 +58,58 @@ class EventData_APP:
             """
         )
 
-        st.header("3️⃣ Apply Actor Filters")
+        st.header("3️⃣ View the Event Code Dictionary")
         st.markdown(
             """
-            - Once you've added Actor 1 and/or Actor 2 codes, click **"Apply Actor Filter"**.
-            - The application will filter data accordingly.
+            - Use the **Event Code Dictionary** section to browse a hierarchical view of Event Codes along with their descriptions.
+            - This will help you identify the right codes for filtering.
+            - Click the toggle button to show or hide the dictionary.
             """
         )
 
-        st.header("4️⃣ Load Data")
+        st.header("4️⃣ Filter by Event Codes (Optional)")
+        st.markdown(
+            """
+            In addition to actor filters, you can refine your search by applying Event Code filters.
+
+            ### **How to Add Event Codes**
+            1. **Enter an Event Code** (as a string, e.g., "081") in the text box.
+            2. Click **"Add Event Code"** to include it in the filter list.
+            3. To remove the last added code, click **"Remove Event Code"**.
+            4. To clear the Event Code list, click **"Reset Event Code List"**.
+
+            💡 **If you don’t add any event codes, the data will include all events without event code filtering.**
+            """
+        )
+
+        st.header("5️⃣ Filter by Root Event Codes (Optional)")
+        st.markdown(
+            """
+            You can also apply filters based on Root Event Codes to target broader event categories.
+
+            ### **How to Add Root Event Codes**
+            1. **Enter a Root Event Code** (e.g., "02") in the provided text box.
+            2. Click **"Add Root Event Code"** to include it in the filter list.
+            3. To remove the last added code, click **"Remove Root Event Code"**.
+            4. To clear the Root Event Code list, click **"Reset Root Event Code List"**.
+
+            💡 **This filter will narrow the data to events corresponding to the specified root category.**
+            """
+        )
+
+        st.header("6️⃣ Load Data")
         st.markdown(
             """
             - Click the **"Load Data"** button to start retrieving data from GDELT.
-            - The application will display the number of records loaded.
-            - **Progress bar** shows the download progress.
+            - A progress bar will show the download progress.
+            - Once the data is loaded, the application will display the number of records retrieved.
             """
         )
 
-        st.header("5️⃣ Download Data")
+        st.header("7️⃣ Download Data")
         st.markdown(
             """
-            - Once data is loaded, you can download it by clicking **"Download Data as ZIP"**.
+            - After data is loaded and filtered, you can download it by clicking **"Download Data as ZIP"**.
             - The downloaded file will contain a CSV file (`data.csv`) with the filtered event records.
             """
         )
@@ -84,15 +119,16 @@ class EventData_APP:
         st.markdown(
             """
             - The application fetches data from **GDELT in CSV format**.
-            - The **Actor 1 and Actor 2 filters** allow you to refine the data based on international actors.
-            - If you don’t select a date range, **no data will be loaded**.
+            - **Actor filters** refine data based on international actor interactions.
+            - **Event Code filters** let you narrow down events by specific codes. Be sure to enter event codes as strings (e.g., "081" remains "081").
+            - **Root Event Code filters** allow you to target broader event categories.
+            - If no date range is selected, **no data will be loaded**.
             - **Errors** may occur if GDELT data is unavailable for certain dates.
-            - LazyLoader currently supports data between **2013-04-01**, and **yesterday**'s date, with support for other dates planned for future updates
-            
+            - LazyLoader currently supports data between **2013-04-01** and **yesterday’s date**.
+
             Happy data scraping! 🚀
             """
         )
-
     def get_dates(self):
         st.write(
             f"Please select the date range between **2013-04-01** and **{date.today() - timedelta(days=1)}** for the data you want to load."
