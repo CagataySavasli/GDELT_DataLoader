@@ -50,7 +50,7 @@ class EventDataLoader:
     def load_data(self, date):
         url = st.session_state["root_url"].format(DATE=date)
         try:
-            df = pd.read_csv(url, sep='\t', header=None)
+            df = pd.read_csv(url, sep='\t', header=None, low_memory=False)
         except Exception as e:
             st.error(f"Error loading data for {date}: {e}")
             return pd.DataFrame()

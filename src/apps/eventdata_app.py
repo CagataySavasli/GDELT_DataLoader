@@ -160,7 +160,7 @@ class EventData_APP:
         st.write(f"Loaded {len(data)} records.")
 
     def camoe_code_searcher(self):
-        df = pd.read_csv("src/cameo/CAMEO_country.txt", sep="\t", header=None, names=["CODE", "LABEL"]).loc[1:].reset_index(
+        df = pd.read_csv("src/cameo/CAMEO_country.txt", sep="\t", header=None, names=["CODE", "LABEL"], low_memory=False).loc[1:].reset_index(
             drop=True).copy()
 
         if df is not None:
