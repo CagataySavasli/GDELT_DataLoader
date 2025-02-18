@@ -18,6 +18,8 @@ class EventData_APP:
         st.session_state.setdefault("actor_code_mask", None)
         st.session_state.setdefault("actor_1_code_list", [])
         st.session_state.setdefault("actor_2_code_list", [])
+        st.session_state.setdefault("event_code_list", [])
+        st.session_state.setdefault("show_event_code_dict", False)
 
 
     def how_to_use(self):
@@ -122,7 +124,7 @@ class EventData_APP:
         st.write(f"Loaded {len(data)} records.")
 
     def camoe_code_searcher(self):
-        df = pd.read_csv("src/CAMEO_country.txt", sep="\t", header=None, names=["CODE", "LABEL"]).loc[1:].reset_index(
+        df = pd.read_csv("src/cameo/CAMEO_country.txt", sep="\t", header=None, names=["CODE", "LABEL"]).loc[1:].reset_index(
             drop=True).copy()
 
         if df is not None:
@@ -194,6 +196,52 @@ class EventData_APP:
         else:
             st.error("Data loader not available.")
 
+    def eventcode_buttons(self):
+        """
+        Displays a text input and three buttons (Add, Remove, Reset) for managing
+        Event Code filters. The event codes are treated as strings, so an input
+        like "081" remains as "081".
+        """
+        st.session_state.setdefault("event_code_list", [])
+
+        col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
+        with col1:
+            event_code = st.text_input("Enter Event Code", key="event_code_input")
+        with col2:
+            if st.button("Add Event Code", key="add_event_code"):
+                if event_code:
+                    # Save the event code as a string (e.g., "081" remains "081")
+                    st.session_state["event_code_list"].append(event_code)
+                    st.success(f"Added Event Code: {event_code}")
+                else:
+                    st.warning("Please enter an Event Code before adding.")
+        with col3:
+            if st.button("Remove Event Code", key="remove_event_code"):
+                if st.session_state["event_code_list"]:
+                    removed = st.session_state["event_code_list"].pop()
+                    st.info(f"Removed Event Code: {removed}")
+                else:
+                    st.warning("No Event Code to remove.")
+        with col4:
+            if st.button("Reset Event Code List", key="reset_event_code"):
+                st.session_state["event_code_list"].clear()
+                st.info("Event Code list has been reset.")
+
+        st.write("Current Event Code List:", st.session_state["event_code_list"])
+
+    def eventcode_filter(self):
+        """
+        Applies the event code filters to the loaded dataset by passing the list of
+        event codes to the data loader.
+        """
+        st.write("Event Codes:", st.session_state["event_code_list"])
+        st.write("Event Filters Applied!")
+        data_loader = st.session_state.get("data_loader")
+        if data_loader:
+            data_loader.set_event_filters(st.session_state["event_code_list"])
+        else:
+            st.error("Data loader not available.")
+
     def download_data_button(self):
         data = st.session_state.get("data")
         if data is not None:
@@ -210,3 +258,117 @@ class EventData_APP:
             )
         else:
             st.info("No data loaded! Please load the data first.")
+
+    def load_cameo_event_codes(self, file_path):
+        """
+        Loads the CAMEO event codes from a text file.
+
+        Expects the first line to be a header. Each subsequent line should contain
+        the event code and its description separated by a tab or whitespace.
+
+        Parameters:
+            file_path (str): Path to the CAMEO event code text file.
+
+        Returns:
+            dict: A dictionary mapping event code to a node dictionary containing the
+                  code, description, and an empty children dict.
+        """
+        codes = {}
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        # Skip the header line
+        for line in lines[1:]:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split('\t')
+            if len(parts) < 2:
+                parts = line.split()
+            code = parts[0]
+            description = " ".join(parts[1:])
+            codes[code] = {'code': code, 'desc': description, 'children': {}}
+
+        return codes
+
+    def build_event_tree(self, codes):
+        """
+        Constructs a hierarchical tree of event codes.
+
+        For each code (except top-level 2-digit codes), its parent is determined by
+        finding the longest prefix (with a minimum length of 2) that exists in the codes.
+
+        Parameters:
+            codes (dict): Dictionary of event code nodes.
+
+        Returns:
+            dict: A hierarchical tree of event codes.
+        """
+        tree = {}
+        # Process codes sorted by length (shorter codes first)
+        for code in sorted(codes.keys(), key=len):
+            node = codes[code]
+            if len(code) == 2:
+                # Top-level code
+                tree[code] = node
+            else:
+                parent_found = False
+                # Look for a parent: try prefixes from len(code)-1 down to 2 characters
+                for i in range(len(code) - 1, 1, -1):
+                    parent_code = code[:i]
+                    if parent_code in codes:
+                        codes[parent_code]['children'][code] = node
+                        parent_found = True
+                        break
+                if not parent_found:
+                    # If no parent is found, add as a top-level code (rare case)
+                    tree[code] = node
+        return tree
+
+    def display_event_tree(self, tree, indent=0):
+        """
+        Recursively displays the event code tree.
+
+        At the top level (indent == 0), each node is displayed as an expander.
+        For nested levels (indent > 0), nodes are shown as indented bullet points.
+
+        Parameters:
+            tree (dict): Hierarchical event code tree.
+            indent (int): Current indentation level.
+        """
+        for code, node in tree.items():
+            if indent == 0:
+                # Top-level nodes: use an expander.
+                with st.expander(f"{code}: {node['desc']}"):
+                    if node['children']:
+                        self.display_event_tree(node['children'], indent=indent + 1)
+            else:
+                # Nested nodes: use indented markdown bullet points.
+                st.markdown(" " * (indent * 4) + f"- **{code}:** {node['desc']}")
+                if node['children']:
+                    self.display_event_tree(node['children'], indent=indent + 1)
+
+    def display_cameo_event_code_dictionary(self):
+        """
+        Loads the CAMEO event code dictionary from a text file,
+        builds the hierarchical tree, and displays it.
+
+        Note: We do not wrap the entire dictionary in an outer expander,
+              so that the top-level expanders are not nested.
+        """
+        file_path = "src/cameo/CAMEO_event.txt"  # Update this path as needed
+        codes = self.load_cameo_event_codes(file_path)
+        tree = self.build_event_tree(codes)
+
+        st.markdown("### CAMEO Event Code Dictionary")
+        st.markdown("Browse the hierarchical event codes by clicking on each top-level expander below.")
+        self.display_event_tree(tree)
+
+    def toggle_event_code_dict(self):
+        """Toggle the visibility flag for the EventCode Dictionary expander."""
+        st.session_state.show_event_code_dict = not st.session_state.show_event_code_dict
+    def control_display_cameo_event_code_dictionary(self):
+        st.button("Toggle EventCode Dictionary", on_click=self.toggle_event_code_dict)
+        if st.session_state.show_event_code_dict:
+            self.display_cameo_event_code_dictionary()
+            st.markdown("---")

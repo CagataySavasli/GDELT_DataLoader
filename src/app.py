@@ -73,6 +73,17 @@ class APP:
         if st.button("Apply Actor Filter"):
             app.actor_filter()
 
+        st.markdown("---")
+        app.control_display_cameo_event_code_dictionary()
+
+        st.subheader("Event Code Filter")
+        app.eventcode_buttons()
+
+        if st.button("Apply Event Code Filter"):
+            app.eventcode_filter()
+
+        st.markdown("---")
+
         if st.button("Load Data"):
             app.load_data()
 

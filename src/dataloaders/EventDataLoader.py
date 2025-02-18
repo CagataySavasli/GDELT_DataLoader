@@ -26,12 +26,22 @@ class EventDataLoader:
         ])
         st.session_state.setdefault("actor_1_code_list", [])
         st.session_state.setdefault("actor_2_code_list", [])
+        st.session_state.setdefault("event_code_list", [])
 
         print("EventDataLoader initialized.")
 
     def set_actor_filters(self, actor_1_list, actor_2_list):
         st.session_state["actor_1_code_list"] = actor_1_list
         st.session_state["actor_2_code_list"] = actor_2_list
+
+    def set_eventcode_filters(self, event_code_list):
+        st.session_state["event_code_list"] = event_code_list
+
+    def fix_event_code(self, row):
+        if len(row['EventRootCode']) == 1:
+            row['EventCode'] = f"0{row['EventCode']}"
+            row['EventRootCode'] = f"0{row['EventRootCode']}"
+        return row
 
     def load_data(self, date):
         url = st.session_state["root_url"].format(DATE=date)
@@ -42,8 +52,17 @@ class EventDataLoader:
             return pd.DataFrame()
         df.columns = st.session_state["columns"]
 
+        df['EventCode'] = df['EventCode'].astype(str)
+        df['EventRootCode'] = df['EventRootCode'].astype(str)
+        df = df.apply(self.fix_event_code, axis=1)
+
         actor_1_codes = st.session_state["actor_1_code_list"]
         actor_2_codes = st.session_state["actor_2_code_list"]
+        event_codes = st.session_state["event_code_list"]
+
+        if event_codes:
+            mask = df['EventCode'].isin(event_codes)
+            df = df[mask].copy()
 
         if actor_1_codes and actor_2_codes:
             mask = (
