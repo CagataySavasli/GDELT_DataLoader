@@ -84,6 +84,15 @@ class APP:
 
         st.markdown("---")
 
+        st.subheader("Root Event Code Filter")
+        app.root_eventcode_buttons()
+
+        if st.button("Apply Root Event Code Filter"):
+            app.root_eventcode_filter()
+
+        st.markdown("---")
+
+
         if st.button("Load Data"):
             app.load_data()
 

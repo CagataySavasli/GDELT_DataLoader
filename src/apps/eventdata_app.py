@@ -229,6 +229,39 @@ class EventData_APP:
 
         st.write("Current Event Code List:", st.session_state["event_code_list"])
 
+    def root_eventcode_buttons(self):
+        """
+        Displays a text input and three buttons (Add, Remove, Reset) for managing
+        Root Event Code filters. The event codes are treated as strings, so an input
+        like "081" remains as "081".
+        """
+        st.session_state.setdefault("root_event_code_list", [])
+
+        col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
+        with col1:
+            root_event_code = st.text_input("Enter Root Event Code", key="root_event_code_input")
+        with col2:
+            if st.button("Add Root Event Code", key="add_root_event_code"):
+                if root_event_code:
+                    st.session_state["root_event_code_list"].append(root_event_code)
+                    st.success(f"Added Root Event Code: {root_event_code}")
+                else:
+                    st.warning("Please enter a Root Event Code before adding.")
+        with col3:
+            if st.button("Remove Root Event Code", key="remove_root_event_code"):
+                if st.session_state["root_event_code_list"]:
+                    removed = st.session_state["root_event_code_list"].pop()
+                    st.info(f"Removed Root Event Code: {removed}")
+                else:
+                    st.warning("No Root Event Code to remove.")
+        with col4:
+            if st.button("Reset Root Event Code List", key="reset_root_event_code"):
+                st.session_state["root_event_code_list"].clear()
+                st.info("Root Event Code list has been reset.")
+
+        st.write("Current Root Event Code List:", st.session_state["root_event_code_list"])
+
+
     def eventcode_filter(self):
         """
         Applies the event code filters to the loaded dataset by passing the list of
@@ -242,6 +275,18 @@ class EventData_APP:
         else:
             st.error("Data loader not available.")
 
+    def root_eventcode_filter(self):
+        """
+        Applies the root event code filters to the loaded dataset by passing the list of
+        event codes to the data loader.
+        """
+        st.write("Root Event Codes:", st.session_state["root_event_code_list"])
+        st.write("Root Event Filters Applied!")
+        data_loader = st.session_state.get("data_loader")
+        if data_loader:
+            data_loader.set_root_event_filters(st.session_state["root_event_code_list"])
+        else:
+            st.error("Data loader not available.")
     def download_data_button(self):
         data = st.session_state.get("data")
         if data is not None:

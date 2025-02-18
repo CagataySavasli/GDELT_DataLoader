@@ -27,6 +27,7 @@ class EventDataLoader:
         st.session_state.setdefault("actor_1_code_list", [])
         st.session_state.setdefault("actor_2_code_list", [])
         st.session_state.setdefault("event_code_list", [])
+        st.session_state.setdefault("root_event_code_list", [])
 
         print("EventDataLoader initialized.")
 
@@ -36,6 +37,9 @@ class EventDataLoader:
 
     def set_eventcode_filters(self, event_code_list):
         st.session_state["event_code_list"] = event_code_list
+
+    def set_root_eventcode_filters(self, root_event_code_list):
+        st.session_state["root_event_code_list"] = root_event_code_list
 
     def fix_event_code(self, row):
         if len(row['EventRootCode']) == 1:
@@ -59,9 +63,14 @@ class EventDataLoader:
         actor_1_codes = st.session_state["actor_1_code_list"]
         actor_2_codes = st.session_state["actor_2_code_list"]
         event_codes = st.session_state["event_code_list"]
+        root_event_codes = st.session_state["root_event_code_list"]
 
         if event_codes:
             mask = df['EventCode'].isin(event_codes)
+            df = df[mask].copy()
+
+        if root_event_codes:
+            mask = df['EventRootCode'].isin(root_event_codes)
             df = df[mask].copy()
 
         if actor_1_codes and actor_2_codes:
