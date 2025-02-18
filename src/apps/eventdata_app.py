@@ -320,7 +320,7 @@ class EventData_APP:
         st.write("Root Event Filters Applied!")
         data_loader = st.session_state.get("data_loader")
         if data_loader:
-            data_loader.set_root_event_filters(st.session_state["root_event_code_list"])
+            data_loader.set_root_eventcode_filters(st.session_state["root_event_code_list"])
         else:
             st.error("Data loader not available.")
     def download_data_button(self):
